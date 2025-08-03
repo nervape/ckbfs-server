@@ -11,25 +11,23 @@ RUN apk add --no-cache \
     g++ \
     git
 
-# Copy package files
-COPY package*.json ./
+# Copy package files and yarn.lock
+COPY package.json yarn.lock ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install all dependencies using yarn
+RUN yarn install --frozen-lockfile
 
 # Development stage
 FROM base AS development
-RUN npm ci
 COPY . .
-EXPOSE 6750
-CMD ["npm", "run", "dev"]
+EXPOSE 6759
+CMD ["yarn", "dev"]
 
 # Build stage
 FROM base AS build
-RUN npm ci
 COPY . .
-RUN npm run build
+RUN yarn build
 
 # Production stage
 FROM node:18-alpine AS production
@@ -41,11 +39,11 @@ RUN adduser -S ckbfs -u 1001
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package files and yarn.lock
+COPY package.json yarn.lock ./
 
-# Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install only production dependencies using yarn
+RUN yarn install --production --frozen-lockfile
 
 # Copy built application
 COPY --from=build --chown=ckbfs:nodejs /app/dist ./dist
@@ -60,11 +58,11 @@ RUN mkdir -p /app/logs && chown -R ckbfs:nodejs /app/logs
 USER ckbfs
 
 # Expose port
-EXPOSE 6750
+EXPOSE 6759
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:6750/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+    CMD node -e "require('http').get('http://localhost:6759/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the application
 CMD ["node", "dist/index.js"]
