@@ -45,12 +45,10 @@ export const schemas = {
         ),
       // TypeID hex: 0x{CKBFS_ID}
       Joi.string()
-        .pattern(/^0x[a-fA-F0-9]{64}$/)
-        .message("Invalid TypeID hex format. Expected: 0x{type_id}"),
-      // TypeID without prefix: {CKBFS_ID}
-      Joi.string()
-        .pattern(/^[a-fA-F0-9]{64}$/)
-        .message("Invalid TypeID format. Expected: 64-character hex string"),
+        .pattern(/^(0x)?[a-fA-F0-9]{64}$/)
+        .message(
+          "Invalid TypeID hex format. Expected: 0x{type_id} or {type_id}",
+        ),
     )
     .required()
     .messages({
