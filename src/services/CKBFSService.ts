@@ -19,6 +19,8 @@ export interface CKBFSServiceOptions {
   timeout?: number;
   retryAttempts?: number;
   retryDelay?: number;
+  mainnetUrl?: string;
+  testnetUrl?: string;
 }
 
 export interface FileContentResult {
@@ -48,7 +50,12 @@ export class CKBFSError extends Error {
 export class CKBFSService {
   private mainnetClient: ClientPublicMainnet;
   private testnetClient: ClientPublicTestnet;
-  private options: Required<CKBFSServiceOptions>;
+  private options: CKBFSServiceOptions & {
+    defaultNetwork: NetworkType;
+    timeout: number;
+    retryAttempts: number;
+    retryDelay: number;
+  };
 
   // URI validation schemas
   private readonly uriSchema = Joi.alternatives().try(
@@ -70,16 +77,24 @@ export class CKBFSService {
       timeout: options.timeout || 30000,
       retryAttempts: options.retryAttempts || 3,
       retryDelay: options.retryDelay || 1000,
+      ...(options.mainnetUrl && { mainnetUrl: options.mainnetUrl }),
+      ...(options.testnetUrl && { testnetUrl: options.testnetUrl }),
     };
 
-    // Initialize CKB clients
-    this.mainnetClient = new ClientPublicMainnet();
-    this.testnetClient = new ClientPublicTestnet();
+    // Initialize CKB clients with optional custom URLs
+    this.mainnetClient = new ClientPublicMainnet(
+      this.options.mainnetUrl ? { url: this.options.mainnetUrl } : undefined,
+    );
+    this.testnetClient = new ClientPublicTestnet(
+      this.options.testnetUrl ? { url: this.options.testnetUrl } : undefined,
+    );
 
     logger.info("CKBFSService initialized", {
       defaultNetwork: this.options.defaultNetwork,
       timeout: this.options.timeout,
       retryAttempts: this.options.retryAttempts,
+      mainnetUrl: this.options.mainnetUrl || "default",
+      testnetUrl: this.options.testnetUrl || "default",
     });
   }
 

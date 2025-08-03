@@ -62,8 +62,9 @@ RUN if [ ! -f yarn.lock ]; then \
 # Copy built application
 COPY --from=build --chown=ckbfs:nodejs /app/dist ./dist
 
-# Copy environment example
+# Copy environment example and template
 COPY --chown=ckbfs:nodejs .env.example ./.env.example
+COPY --chown=ckbfs:nodejs .env.template ./.env.template
 
 # Create logs directory
 RUN mkdir -p /app/logs && chown -R ckbfs:nodejs /app/logs

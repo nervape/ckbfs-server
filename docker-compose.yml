@@ -12,31 +12,13 @@ services:
       - NODE_ENV=production
       - PORT=6759
       - CKB_NETWORK=mainnet
+      - CKB_MAINNET_URL=
+      - CKB_TESTNET_URL=
       - LOG_LEVEL=info
       - HELMET_ENABLED=true
     restart: unless-stopped
     networks:
       - ckbfs-network
-
-  ckbfs-server-test:
-    build:
-      context: .
-      target: development
-    container_name: ckbfs-server-test
-    ports:
-      - "6760:6759"
-    environment:
-      - NODE_ENV=test
-      - PORT=6759
-      - CKB_NETWORK=testnet
-      - LOG_LEVEL=warn
-    volumes:
-      - .:/app
-      - /app/node_modules
-    restart: "no"
-    networks:
-      - ckbfs-network
-
 networks:
   ckbfs-network:
     driver: bridge

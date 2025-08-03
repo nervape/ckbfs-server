@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { CKBFSService, CKBFSError } from "../services/CKBFSService";
 import { logger } from "../utils/logger";
+import { config } from "../utils/config";
 import {
   ApiResponse,
   ErrorResponse,
@@ -31,7 +32,11 @@ export class CKBFSController {
   private ckbfsService: CKBFSService;
 
   constructor() {
-    this.ckbfsService = new CKBFSService();
+    this.ckbfsService = new CKBFSService({
+      defaultNetwork: config.ckb.network,
+      ...(config.ckb.mainnetUrl && { mainnetUrl: config.ckb.mainnetUrl }),
+      ...(config.ckb.testnetUrl && { testnetUrl: config.ckb.testnetUrl }),
+    });
 
     // Bind methods to preserve 'this' context
     this.getFileByURI = this.getFileByURI.bind(this);

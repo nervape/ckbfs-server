@@ -13,6 +13,8 @@ export interface AppConfig {
   };
   ckb: {
     network: NetworkType;
+    mainnetUrl?: string;
+    testnetUrl?: string;
   };
   cors: {
     origin: string;
@@ -88,6 +90,12 @@ export const config: AppConfig = {
   },
   ckb: {
     network: validateNetwork(getEnvVar("CKB_NETWORK", "testnet")),
+    ...(process.env.CKB_MAINNET_URL && {
+      mainnetUrl: process.env.CKB_MAINNET_URL,
+    }),
+    ...(process.env.CKB_TESTNET_URL && {
+      testnetUrl: process.env.CKB_TESTNET_URL,
+    }),
   },
   cors: {
     origin: getEnvVar("CORS_ORIGIN", "*"),
