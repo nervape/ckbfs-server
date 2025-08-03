@@ -11,12 +11,19 @@ RUN apk add --no-cache \
     g++ \
     git
 
-# Copy package files and yarn.lock
-COPY package.json yarn.lock ./
+# Copy package files
+COPY package.json ./
 COPY tsconfig.json ./
 
-# Install all dependencies using yarn
-RUN yarn install --frozen-lockfile
+# Copy yarn.lock if it exists, otherwise generate it
+COPY yarn.loc[k] ./
+RUN if [ ! -f yarn.lock ]; then \
+    echo "yarn.lock not found, generating..."; \
+    yarn install; \
+    else \
+    echo "yarn.lock found, installing with frozen lockfile..."; \
+    yarn install --frozen-lockfile; \
+    fi
 
 # Development stage
 FROM base AS development
@@ -39,11 +46,18 @@ RUN adduser -S ckbfs -u 1001
 # Set working directory
 WORKDIR /app
 
-# Copy package files and yarn.lock
-COPY package.json yarn.lock ./
+# Copy package files
+COPY package.json ./
 
-# Install only production dependencies using yarn
-RUN yarn install --production --frozen-lockfile
+# Copy yarn.lock if it exists, otherwise generate it for production
+COPY yarn.loc[k] ./
+RUN if [ ! -f yarn.lock ]; then \
+    echo "yarn.lock not found, generating for production..."; \
+    yarn install --production; \
+    else \
+    echo "yarn.lock found, installing production dependencies with frozen lockfile..."; \
+    yarn install --production --frozen-lockfile; \
+    fi
 
 # Copy built application
 COPY --from=build --chown=ckbfs:nodejs /app/dist ./dist
