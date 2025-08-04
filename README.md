@@ -11,7 +11,6 @@ A RESTful server for CKBFS (CKB File System) URI decoding and file retrieval. Th
 - **Response Formats**: JSON with metadata or raw file content
 - **Validation**: Comprehensive input validation and error handling
 - **Health Monitoring**: Service health checks and monitoring
-- **TypeScript**: Full type safety and comprehensive documentation
 
 ## Supported URI Formats
 
